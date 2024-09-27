@@ -3,6 +3,7 @@ const answersElement = document.getElementById('answers');
 const scoreElement = document.getElementById('score');
 let score = 0;
 let maxPossibleScore = 0;
+let streak = 0; // Total number of answers 
 let incorrectAnswers; // Total number of incorrect answers
 let incorrectAnswersRemaining; // New variable to track remaining incorrect answers
 let hearts; // Total hearts
@@ -16,6 +17,7 @@ const milestoneTitles = [
 	'Unbelievable!'
     // Add more titles as needed for further milestones
 ];
+let timer = 5 * 60; // 5 minutes in seconds
 
 
 //let selectedOperations = ['+', '-', '×', '÷'];
@@ -23,20 +25,15 @@ const milestoneTitles = [
 //let maxNumber = 10;
 
 let gameSettings = {
-    currentDifficulty: 'easy',
+    currentDifficulty: 'custom',
     operations: {
-        '+': { enabled: true, min: 1, max: 10 },
-        '-': { enabled: true, min: 1, max: 10 },
-        '×': { enabled: false, min: 1, max: 10 },
-        '÷': { enabled: false, min: 1, max: 10 }
-    },
-    customSettings: {
-        '+': { enabled: true, min: 1, max: 10 },
-        '-': { enabled: true, min: 1, max: 10 },
-        '×': { enabled: false, min: 1, max: 10 },
-        '÷': { enabled: false, min: 1, max: 10 }
+        '+': { enabled: false, min: 1, max: 99 },
+        '-': { enabled: false, min: 1, max: 99 },
+        '×': { enabled: true, min: 1, max: 10 },
+        '÷': { enabled: true, min: 1, max: 10 }
     }
 };
+
 
 //let operationSettings = {}; // Holds min and max for each operation
 
@@ -44,11 +41,11 @@ function startGame() {
   // Reset game state
   // Adjust these values to change hard-coded settings
   lastMilestoneReached = 0;
-  milestoneIncrements = 50;
+  milestoneIncrements = 5;
   hearts = 5;
   incorrectAnswers = 3;
   score = 0;
-  scoreElement.innerText = 'Score: 0';
+  scoreElement.innerText = 'Streak: 0';
 
   // Ensure at least one operation is selected
   //if (Object.keys(operationSettings).length === 0) {
@@ -56,7 +53,8 @@ function startGame() {
   //  return;
   //}
 
-  updateHearts();
+  //updateHearts();
+  startTimer();
   generateQuestion();
 }
 
@@ -69,8 +67,8 @@ function generateQuestion() {
     const min = gameSettings.operations[operation].min;
     const max = gameSettings.operations[operation].max;
 
-    let num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-    let num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+    let num1 = _getRandomNumber(min, max);
+    let num2 = _getRandomNumber(min, max);
 
     let correctAnswer;
     switch (operation) {
@@ -85,13 +83,26 @@ function generateQuestion() {
             correctAnswer = num1 - num2;
             break;
         case '×':
+            // Reduce likelihood of multiplying by 0 or 1
+            if (num1 < 2) {
+                num1 = _getRandomNumber(min, max);
+            }
+            if (num2 < 2) {
+                num2 = _getRandomNumber(min, max);
+            }
+        
             correctAnswer = num1 * num2;
             break;
         case '÷':
-			// Ensuring integer division
-		    num2 = num1 !== 0 ? num2 : 2; // Avoid division by zero -- default to 2 instead
-		    correctAnswer = Math.floor(num1 / num2); // Ensure result is an integer
-		    num1 = correctAnswer * num2; // Adjust so division is clean
+
+            // Prevent division by zero
+            if ( num2 == 0 ) {
+                max = max >= 1 ? max : 1; // Ensure max >= 1
+                num2 = _getRandomNumber(1, max);
+            }
+
+            correctAnswer = num1;
+            num1 = num1 * num2;
             break;
         default:
 			console.error("Unknown mathematical operation requested: " + operation);
@@ -106,6 +117,10 @@ function generateQuestion() {
 
   generateAnswers(correctAnswer);
 }
+
+  function _getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
 function generateAnswers(correctAnswer) {
     answersElement.innerHTML = ''; // Clear previous answers
@@ -146,29 +161,57 @@ function generateAnswerValue(index, correctAnswer, answers) {
 function checkAnswer(clickedButton, correctAnswer) {
     const isCorrect = parseInt(clickedButton.innerText) === correctAnswer;
     const buttons = answersElement.querySelectorAll('button');
-    buttons.forEach(btn => {
-        if (parseInt(btn.innerText) !== correctAnswer) {
-            btn.style.display = 'none'; // Hide incorrect answers
-        } else {
-            btn.style.backgroundColor = 'lightgreen'; // Highlight the correct answer
-        }
-    });
 
     if (!isCorrect) {
-        hearts -= 1;
-        updateHearts();
-        if (hearts === 0) {
-            showGameOverScreen();
-        } else {
-            setTimeout(generateQuestion, 1000); // Wait for 1 second before moving to the next question
-        }
+        streak = 0; // Reset the streak if the answer is incorrect
+        buttons.forEach(btn => {
+            if (parseInt(btn.innerText) === correctAnswer) {
+                btn.style.backgroundColor = 'lightgreen'; // Highlight the correct answer in green
+            } else if (parseInt(btn.innerText) === parseInt(clickedButton.innerText)) {
+                btn.style.backgroundColor = 'red'; // Highlight the clicked wrong answer in red
+            } else {
+                btn.style.opacity = 0; // Hide other incorrect answers
+            }
+        });
+        // Uncomment the following lines if you decide to handle hearts and game over
+        // hearts -= 1;
+        // updateHearts();
+        // if (hearts === 0) {
+        //     showGameOverScreen();
+        // } else {
+        //     setTimeout(generateQuestion, 1000); // Wait for 1 second before moving to the next question
+        // }
     } else {
-        score += incorrectAnswersRemaining; // Adjust score calculation if needed
-        scoreElement.innerText = `Score: ${score}`;
-		checkScoreMilestone(); // Check for milestones after updating the score
-        setTimeout(generateQuestion, 1000); // Move to the next question after a brief pause
+        streak++;
+        buttons.forEach(btn => {
+            if (parseInt(btn.innerText) !== correctAnswer) {
+                btn.style.opacity = 0; // Hide incorrect answers
+            } else {
+                btn.style.backgroundColor = 'lightgreen'; // Highlight the correct answer
+            }
+        });
+        checkStreakMilestone(); // Check for streak milestones
     }
+    scoreElement.innerText = `Streak: ${streak}`;
+    setTimeout(generateQuestion, 1000); // Move to the next question after a delay
 }
+
+function startTimer() {
+    const timerElement = document.getElementById('timer-panel');
+
+    const interval = setInterval(() => {
+        const minutes = Math.floor(timer / 60);
+        const seconds = timer % 60;
+        timerElement.innerText = `Keep practicing for ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timer === 0) {
+            clearInterval(interval);
+            showMilestoneModal('images/HappyPanda2.png', 'You\'re all done!');
+        }
+        timer--;
+    }, 1000);
+}
+
 
 function updateHearts() {
     const livesContainer = document.getElementById('lives');
@@ -193,6 +236,7 @@ function showGameOverScreen() {
     document.body.appendChild(gameOverModal);
 }
 
+/*
 function checkScoreMilestone() {
     const currentMilestoneIndex = Math.floor(score / milestoneIncrements); // Determine current milestone index
     if (currentMilestoneIndex > lastMilestoneReached) { // Check if new milestone reached
@@ -218,6 +262,14 @@ function checkScoreMilestone() {
         lastMilestoneReached = currentMilestoneIndex;
     }
 }
+*/
+
+function checkStreakMilestone() {
+    if (streak % milestoneIncrements == 0 ) {
+        const milestoneIndex = Math.min(streak / 5, milestoneTitles.length);
+        showMilestoneModal(`images/HappyPanda${milestoneIndex + 1}.png`, milestoneTitles[milestoneIndex]);
+    }
+}
 
 
 function showMilestoneModal(image, title) {
@@ -226,7 +278,7 @@ function showMilestoneModal(image, title) {
         <div class="game-over-container">
             <img src="${image}" alt="Happy Panda" id="milestone-panda" />
             <h1>${title}</h1>
-            <p>Your score: ${score}</p>
+            <p>Streak of ${streak}!</p>
             <button onclick="closeMilestoneModal()">Continue</button>
         </div>
     `;
@@ -242,8 +294,9 @@ function restartGame() {
     document.querySelector('.modal').remove();
     score = 0;
     hearts = 6; // Resetting to 3 full hearts
-    scoreElement.innerText = 'Score: 0';
-    updateHearts();
+    scoreElement.innerText = 'Streak: 0';
+    //updateHearts();
+    updateOperationSettings();
     startGame(); // Start the game again
 }
 
@@ -259,16 +312,16 @@ function updateSettings(difficulty) {
                 updateOperationSettings(true, true, false, false, 1, 10, 1, 10);
                 break;
             case "medium":
-                updateOperationSettings(true, true, true, true, 1, 10, 1, 10);
+                updateOperationSettings(true, true, true, false, 1, 10, 1, 10);
                 break;
             case "hard":
-                updateOperationSettings(true, true, true, true, 1, 99, 1, 12);
+                updateOperationSettings(true, true, true, true, 1, 99, 1, 10);
                 break;
         }
     } else {
-        //restoreCustomSettings();
+        restoreCustomSettings();
     }
-    //updateFormUI();
+    generateQuestion();
 }
 
 function updateOperationSettings(add, subtract, multiply, divide, minAddSub, maxAddSub, minMulDiv, maxMulDiv) {
@@ -284,6 +337,34 @@ function updateOperationSettings(add, subtract, multiply, divide, minAddSub, max
     gameSettings.operations['-'].max = maxAddSub;
     gameSettings.operations['×'].max = maxMulDiv;
     gameSettings.operations['÷'].max = maxMulDiv;
+
+    console.log("Updated game settings:", gameSettings);
+}
+
+function restoreCustomSettings() {
+    // Update the difficulty level
+    gameSettings.currentDifficulty = 'custom';
+
+    // Update the operations settings
+    gameSettings.operations['+'].enabled = document.getElementById('add').checked;
+    gameSettings.operations['-'].enabled = document.getElementById('subtract').checked;
+    gameSettings.operations['×'].enabled = document.getElementById('multiply').checked;
+    gameSettings.operations['÷'].enabled = document.getElementById('divide').checked;
+
+    alert(document.querySelector('#additionSettings .min-number').value);
+
+    // Update the range values for each operation
+    gameSettings.operations['+'].min = parseInt(document.querySelector('#additionSettings .min-number').value, 10);
+    alert(gameSettings.operations['+'].min);
+    gameSettings.operations['+'].max = parseInt(document.querySelector('#additionSettings .max-number').value, 10);
+    gameSettings.operations['-'].min = parseInt(document.querySelector('#subtractionSettings .min-number').value, 10);
+    gameSettings.operations['-'].max = parseInt(document.querySelector('#subtractionSettings .max-number').value, 10);
+    gameSettings.operations['×'].min = parseInt(document.querySelector('#multiplicationSettings .min-number').value, 10);
+    gameSettings.operations['×'].max = parseInt(document.querySelector('#multiplicationSettings .max-number').value, 10);
+    gameSettings.operations['÷'].min = parseInt(document.querySelector('#divisionSettings .min-number').value, 10);
+    gameSettings.operations['÷'].max = parseInt(document.querySelector('#divisionSettings .max-number').value, 10);
+
+    console.log("Updated game settings:", gameSettings);
 }
 
 document.querySelectorAll('input[name="difficulty"]').forEach(radio => {

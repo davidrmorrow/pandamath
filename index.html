@@ -24,26 +24,29 @@
 			<img src="heart.webp" alt="Full Heart" class="heart">
 			<img src="heart.webp" alt="Full Heart" class="heart">
 		  </div>
-		  <p id="score">Score: 0</p>
+		  <p id="score">Streak: 0</p>
 		  <button id="restartButton" onclick="startGame()">Restart Game</button>
 		</div>
 		
+		<!-- Timer panel -->
+		<div id="timer-panel"></div>
+
 		<!-- Settings Panel with Tabs -->
 		<div id="settings-panel">
 			<h3>Choose Difficulty:</h3>
-			<input type="radio" id="easy" name="difficulty" value="easy" checked>
+			<input type="radio" id="easy" name="difficulty" value="easy">
 			<label for="easy">Easy</label><br>
 			<input type="radio" id="medium" name="difficulty" value="medium">
 			<label for="medium">Medium</label><br>
 			<input type="radio" id="hard" name="difficulty" value="hard">
 			<label for="hard">Hard</label><br>
-			<input type="radio" id="custom" name="difficulty" value="custom">
+			<input type="radio" id="custom" name="difficulty" value="custom" checked>
 			<label for="custom">Custom</label>
 
 			<div id="custom-settings">
 				<h3>Custom Settings:</h3>
-				  <div class="operation" data-operation="+">
-					<input type="checkbox" id="add" checked>
+				  <div class="operation" id="additionSettings" data-operation="+">
+					<input type="checkbox" id="add">
 					<label for="add">Addition (+)</label>
 					<div class="range">
 					  <label>Min:</label>
@@ -54,8 +57,8 @@
 					  <input type="number" class="max-number" value="99">
 					</div>
 				  </div>
-				  <div class="operation" data-operation="-">
-					<input type="checkbox" id="subtract" checked>
+				  <div class="operation" id="subtractionSettings" data-operation="-">
+					<input type="checkbox" id="subtract">
 					<label for="subtract">Subtraction (-)</label>
 					<div class="range">
 					  <label>Min:</label>
@@ -66,28 +69,28 @@
 					  <input type="number" class="max-number" value="99">
 					</div>
 				  </div>
-				  <div class="operation" data-operation="×">
+				  <div class="operation" id="multiplicationSettings" data-operation="×">
 					<input type="checkbox" id="multiply" checked>
 					<label for="multiply">Multiplication (×)</label>
 					<div class="range">
 					  <label>Min:</label>
-					  <input type="number" class="min-number" value="1">
+					  <input type="number" class="min-number" value="2">
 					</div>
 					<div class="range">
 					  <label>Max:</label>
-					  <input type="number" class="max-number" value="12">
+					  <input type="number" class="max-number" value="10">
 					</div>
 				  </div>
-				  <div class="operation" data-operation="÷">
+				  <div class="operation" id="divisionSettings" data-operation="÷">
 					<input type="checkbox" id="divide" checked>
 					<label for="divide">Division (÷)</label>
 					<div class="range">
 					  <label>Min:</label>
-					  <input type="number" class="min-number" value="1">
+					  <input type="number" class="min-number" value="2">
 					</div>
 					<div class="range">
 					  <label>Max:</label>
-					  <input type="number" class="max-number" value="12">
+					  <input type="number" class="max-number" value="10">
 					</div>
 				  </div>
 			</div>
