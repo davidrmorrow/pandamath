@@ -10,19 +10,20 @@ let hearts; // Total hearts
 let lastMilestoneReached; // Tracks the highest milestone reached
 let milestoneIncrements; // Size of milestone increments
 const milestoneTitles = [
-    'Great Job!',    
-    'Amazing!',      
+    'Great job!',    
+    'Way to go!',      
     'Incredible!',   
+    'Keep going!',
     'Unstoppable!',  
-	'Unbelievable!'
+	'Unbelievable!',
+    'You\'re on fire!',
+    //'Amazing!',
+    //'Brilliant!',
+    //'You rock!',
+    //'You\'re a star!',
     // Add more titles as needed for further milestones
 ];
 let timer = 5 * 60; // 5 minutes in seconds
-
-
-//let selectedOperations = ['+', '-', '×', '÷'];
-//let minNumber = 1;
-//let maxNumber = 10;
 
 let gameSettings = {
     currentDifficulty: 'custom',
@@ -34,9 +35,6 @@ let gameSettings = {
     }
 };
 
-
-//let operationSettings = {}; // Holds min and max for each operation
-
 function startGame() {
   // Reset game state
   // Adjust these values to change hard-coded settings
@@ -47,11 +45,14 @@ function startGame() {
   score = 0;
   scoreElement.innerText = 'Streak: 0';
 
-  // Ensure at least one operation is selected
-  //if (Object.keys(operationSettings).length === 0) {
-  //  alert('Please select at least one operation.');
-  //  return;
-  //}
+// Apply the selected difficulty settings
+const selectedOption = document.querySelector('input[name="difficulty"]:checked');
+if (selectedOption) {
+    updateSettings(selectedOption.value); // Apply predefined difficulty settings (easy, medium, hard)
+}
+else {
+    console.error("No difficulty setting selected.");
+}
 
   //updateHearts();
   startTimer();
@@ -59,103 +60,138 @@ function startGame() {
 }
 
 function generateQuestion() {
-    // Filter out disabledoperations and select a random one from those enabled
+    // Filter out disabled operations
     const enabledOperations = Object.keys(gameSettings.operations).filter(op => gameSettings.operations[op].enabled);
+    if (enabledOperations.length === 0) {
+        console.error("No operations enabled. Please enable at least one operation.");
+        return;
+    }
+
+    // Randomly select an operation
     const operation = enabledOperations[Math.floor(Math.random() * enabledOperations.length)];
+    const selectedIntegers = gameSettings.operations[operation].selectedIntegers;
 
-    // Get the min and max range for the selected operation
-    const min = gameSettings.operations[operation].min;
-    const max = gameSettings.operations[operation].max;
+    // Validate selectedIntegers
+    if (!Array.isArray(selectedIntegers) || selectedIntegers.length === 0) {
+        console.error(`No integers were selected for ${operation}`, selectedIntegers);
+        alert(`Oops! Be sure to choose some numbers to use for ${operation} problems!`);
+        return;
+    }
+    
+    let num1, num2, correctAnswer;
 
-    let num1 = _getRandomNumber(min, max);
-    let num2 = _getRandomNumber(min, max);
-
-    let correctAnswer;
     switch (operation) {
-        case '+':
+        case '+': // Addition
+            num1 = _getRandomElement(selectedIntegers);
+            num2 = _getRandomElement(selectedIntegers);
             correctAnswer = num1 + num2;
             break;
-        case '-':
-		    // Ensure num1 is always greater than or equal to num2 for subtraction
-			if (num1 < num2) {
-			  [num1, num2] = [num2, num1]; // Swap num1 and num2 if num1 is smaller than num2
-			}
+
+        case '-': // Subtraction
+            num1 = _getRandomElement(selectedIntegers);
+            num2 = _getRandomElement(selectedIntegers);
+            if (num1 < num2) [num1, num2] = [num2, num1]; // Ensure num1 >= num2
             correctAnswer = num1 - num2;
             break;
-        case '×':
-            // Reduce likelihood of multiplying by 0 or 1
-            if (num1 < 2) {
-                num1 = _getRandomNumber(min, max);
-            }
-            if (num2 < 2) {
-                num2 = _getRandomNumber(min, max);
-            }
-        
+
+        case '×': // Multiplication
+            num1 = _getRandomElement(selectedIntegers);
+            num2 = _getRandomNumber(1, 10); // Multiply with numbers 1–10
             correctAnswer = num1 * num2;
             break;
-        case '÷':
 
-            // Prevent division by zero
-            if ( num2 == 0 ) {
-                max = max >= 1 ? max : 1; // Ensure max >= 1
-                num2 = _getRandomNumber(1, max);
-            }
-
-            correctAnswer = num1;
-            num1 = num1 * num2;
+        case '÷': // Division
+            num2 = _getRandomElement(selectedIntegers); // Divisor
+            num1 = num2 * _getRandomNumber(1, 10); // Ensure integer division
+            correctAnswer = num1 / num2;
             break;
+
         default:
-			console.error("Unknown mathematical operation requested: " + operation);
-            generateQuestion();  // Generate a new question if the operation is unknown
-            return;    }
+            console.error("Unknown operation:", operation);
+            generateQuestion(); // Retry if the operation is invalid
+            return;
+    }
 
     const question = `What is ${num1} ${operation} ${num2}?`;
-	questionElement.innerText = question;
-    console.log(question); // Output the question to the console for now
-  
-  maxPossibleScore += 4;  
+    questionElement.innerText = question;
+    console.log(question); // Log the question for debugging purposes
 
-  generateAnswers(correctAnswer);
+    generateAnswers(num1, num2, correctAnswer, operation);
 }
 
-  function _getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-function generateAnswers(correctAnswer) {
-    answersElement.innerHTML = ''; // Clear previous answers
-
-    const correctPosition = Math.floor(Math.random() * (incorrectAnswers + 1)); // Position for the correct answer among all possibilities
-	let answers = new Set([correctAnswer]); // Ensure all answers are unique
-    for (let i = 0; i < incorrectAnswers + 1; i++) {
-        const button = document.createElement('button');
-        let answerValue = i == correctPosition ? correctAnswer : generateAnswerValue(i, correctAnswer, answers);
-        button.innerText = answerValue;
-        button.addEventListener('click', function() {
-            checkAnswer(this, correctAnswer);
-        });
-        answersElement.appendChild(button);
+    function _getRandomElement(array) {
+        return array[Math.floor(Math.random() * array.length)];
     }
-	
-	incorrectAnswersRemaining = incorrectAnswers;
-}
 
-function generateAnswerValue(index, correctAnswer, answers) {
-	let incorrectAnswer;
-	do {
-		if ( correctAnswer < 10 ) {
-			incorrectAnswer = correctAnswer + Math.floor((Math.random() * 10 )) - 5;
-		}
-		else {
-			const offset = Math.floor(Math.random() * (correctAnswer * 0.25 + 1)); // Max 25% of correctAnswer
-			incorrectAnswer = correctAnswer + (Math.random() < 0.5 ? -offset : offset); // Adjust up or down
-		}
-		// Only return positive values
-		if (incorrectAnswer < 0) incorrectAnswer = Math.abs(incorrectAnswer);
-	} while (answers.has(incorrectAnswer));
-	answers.add(incorrectAnswer);
-	return incorrectAnswer;
-}
+    function _getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateAnswers(num1, num2, correctAnswer, operation) {
+        answersElement.innerHTML = ''; // Clear previous answers
+    
+        const correctPosition = Math.floor(Math.random() * (incorrectAnswers + 1)); // Position for the correct answer
+        let answers = new Set([correctAnswer]); // Ensure all answers are unique
+    
+        for (let i = 0; i < incorrectAnswers + 1; i++) {
+            const button = document.createElement('button');
+            let answerValue =
+                i === correctPosition
+                    ? correctAnswer
+                    : generateAnswerValue(num1, num2, correctAnswer, answers, operation);
+            button.innerText = answerValue;
+            button.addEventListener('click', function () {
+                checkAnswer(this, correctAnswer);
+            });
+            answersElement.appendChild(button);
+        }
+    
+        incorrectAnswersRemaining = incorrectAnswers;
+    }
+    
+    
+
+    function generateAnswerValue(num1, num2, correctAnswer, answers, operation) {
+        let incorrectAnswer = 0;
+    
+        do {
+            if (operation === '+' || operation === '-') {
+                // Addition and subtraction: Generate close values
+                if (correctAnswer < 10) {
+                    incorrectAnswer = correctAnswer + Math.floor(Math.random() * 10) - 5;
+                } else {
+                    const offset = Math.floor(Math.random() * (correctAnswer * 0.25 + 1)); // Max 25% of correctAnswer
+                    incorrectAnswer = correctAnswer + (Math.random() < 0.5 ? -offset : offset); // Adjust up or down
+                }
+            } else if (operation === '×') {
+                // Multiplication: Generate nearby products
+                const adjustment = (Math.random() > 0.5 ? 1 : -1)       // Choose plus or minus randomly
+                                   * (Math.floor(Math.random()*3 + 1)); // Choose 1, 2, or 3 randomly
+                incorrectAnswer = Math.random() < 0.5
+                    ? (num1 + adjustment) * num2 // Slight variation in num1
+                    : num1 * (num2 + adjustment); // Slight variation in num2
+                
+                // Avoid offering 0 as a distractor answer for multiplication
+                if ( incorrectAnswer === 0 ) incorrectAnswer = Math.round(correctAnswer * 0.67);
+            } else if (operation === '÷') {
+                // Division: Generate plausible distractor answers
+                const adjustment = (Math.random() < 0.5 ? -1 : 1)          // Choose plus or minus randomly
+                                    * Math.floor(Math.random() * 3 + 1);   // Choose 1, 2, or 3 randomly
+                incorrectAnswer = correctAnswer + ( num2 * adjustment);
+
+                // Avoid offering distractors that are larger that than the dividend 
+                if ( incorrectAnswer > num1 ) incorrectAnswer -= correctAnswer; 
+            }
+    
+            // Ensure the answer is unique and positive
+            if (incorrectAnswer < 0) incorrectAnswer = Math.abs(incorrectAnswer);
+        } while (answers.has(incorrectAnswer) || incorrectAnswer === correctAnswer);
+    
+        answers.add(incorrectAnswer);
+        return incorrectAnswer;
+    }
+    
+    
 
 
 function checkAnswer(clickedButton, correctAnswer) {
@@ -296,7 +332,6 @@ function restartGame() {
     hearts = 6; // Resetting to 3 full hearts
     scoreElement.innerText = 'Streak: 0';
     //updateHearts();
-    updateOperationSettings();
     startGame(); // Start the game again
 }
 
@@ -305,24 +340,54 @@ function restartGame() {
  **********************/
 
 function updateSettings(difficulty) {
-    if (difficulty !== 'custom') {
-        gameSettings.currentDifficulty = difficulty;
-        switch (difficulty) {
-            case "easy":
-                updateOperationSettings(true, true, false, false, 1, 10, 1, 10);
-                break;
-            case "medium":
-                updateOperationSettings(true, true, true, false, 1, 10, 1, 10);
-                break;
-            case "hard":
-                updateOperationSettings(true, true, true, true, 1, 99, 1, 10);
-                break;
-        }
+    if (difficulty === 'custom') {
+        restoreCustomSettings(); // Use the custom settings logic already provided
     } else {
-        restoreCustomSettings();
+        // Set predefined settings based on the selected difficulty
+        switch (difficulty) {
+            case 'easy':
+                // Simple problems with small numbers
+                gameSettings.operations['+'] = { enabled: true, selectedIntegers: [1, 2, 3, 4, 5] };
+                gameSettings.operations['-'] = { enabled: true, selectedIntegers: [1, 2, 3, 4, 5] };
+                gameSettings.operations['×'] = { enabled: false, selectedIntegers: [] }; // Disable multiplication
+                gameSettings.operations['÷'] = { enabled: false, selectedIntegers: [] }; // Disable division
+                break;
+
+            case 'medium':
+                // Add multiplication and division with broader ranges
+                gameSettings.operations['+'] = { enabled: true, selectedIntegers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] };
+                gameSettings.operations['-'] = { enabled: true, selectedIntegers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] };
+                gameSettings.operations['×'] = { enabled: true, selectedIntegers: [1, 2, 3, 4, 5] }; // Multiples of 1–5
+                gameSettings.operations['÷'] = { enabled: true, selectedIntegers: [1, 2, 3, 4, 5] }; // Divisors 1–5
+                break;
+
+            case 'hard':
+                // All operations with wide ranges
+                gameSettings.operations['+'] = { enabled: true, selectedIntegers: _generateRange(1, 49) };
+                gameSettings.operations['-'] = { enabled: true, selectedIntegers: _generateRange(1, 49) };
+                gameSettings.operations['×'] = { enabled: true, selectedIntegers: _generateRange(2, 10) }; // Multiples of 2–10
+                gameSettings.operations['÷'] = { enabled: true, selectedIntegers: _generateRange(2, 10) }; // Divisors 2–10
+                break;
+
+            default:
+                console.error(`Unknown difficulty: ${difficulty}`);
+        }
     }
+
+    console.log("Updated game settings:", gameSettings);
+    saveCustomSettingsToLocalStorage(); // Save settings, if needed
     generateQuestion();
 }
+
+    function _generateRange(start, end) {
+        const range = [];
+        for (let i = start; i <= end; i++) {
+            range.push(i);
+        }
+        return range;
+    }
+
+
 
 function updateOperationSettings(add, subtract, multiply, divide, minAddSub, maxAddSub, minMulDiv, maxMulDiv) {
     gameSettings.operations['+'].enabled = add;
@@ -342,36 +407,52 @@ function updateOperationSettings(add, subtract, multiply, divide, minAddSub, max
 }
 
 function restoreCustomSettings() {
-    // Update the difficulty level
-    gameSettings.currentDifficulty = 'custom';
+    document.querySelectorAll('.operation').forEach(operationBlock => {
+        const operation = operationBlock.getAttribute('data-operation');
+        const checkbox = operationBlock.querySelector('input[type="checkbox"]');
 
-    // Update the operations settings
-    gameSettings.operations['+'].enabled = document.getElementById('add').checked;
-    gameSettings.operations['-'].enabled = document.getElementById('subtract').checked;
-    gameSettings.operations['×'].enabled = document.getElementById('multiply').checked;
-    gameSettings.operations['÷'].enabled = document.getElementById('divide').checked;
+        // Check if the operation is enabled
+        gameSettings.operations[operation].enabled = checkbox.checked;
 
-    alert(document.querySelector('#additionSettings .min-number').value);
+        if (operation === '+' || operation === '-') {
+            // Handle addition and subtraction with min/max input boxes
+            const minInput = operationBlock.querySelector('input[type="number"][id$="min"]');
+            const maxInput = operationBlock.querySelector('input[type="number"][id$="max"]');
 
-    // Update the range values for each operation
-    gameSettings.operations['+'].min = parseInt(document.querySelector('#additionSettings .min-number').value, 10);
-    alert(gameSettings.operations['+'].min);
-    gameSettings.operations['+'].max = parseInt(document.querySelector('#additionSettings .max-number').value, 10);
-    gameSettings.operations['-'].min = parseInt(document.querySelector('#subtractionSettings .min-number').value, 10);
-    gameSettings.operations['-'].max = parseInt(document.querySelector('#subtractionSettings .max-number').value, 10);
-    gameSettings.operations['×'].min = parseInt(document.querySelector('#multiplicationSettings .min-number').value, 10);
-    gameSettings.operations['×'].max = parseInt(document.querySelector('#multiplicationSettings .max-number').value, 10);
-    gameSettings.operations['÷'].min = parseInt(document.querySelector('#divisionSettings .min-number').value, 10);
-    gameSettings.operations['÷'].max = parseInt(document.querySelector('#divisionSettings .max-number').value, 10);
+            let min = parseInt(minInput.value, 10);
+            let max = parseInt(maxInput.value, 10);
 
-    console.log("Updated game settings:", gameSettings);
+            if (min > max) {
+                alert("The minimum allowable number for " + operation + " can't be less than the minimum.");
+                max = min + 1; // Gracefully reset max to be one more than min
+                maxInput.value = max; // Update the input field
+            }
+
+            gameSettings.operations[operation].selectedIntegers = checkbox.checked ? _generateRange(min, max) : [];
+        } else if (operation === '×' || operation === '÷') {
+
+            // Handle multiplication and division with chip-based inputs
+            const chips = operationBlock.querySelectorAll('.chip.selected');
+            gameSettings.operations[operation].selectedIntegers = checkbox.checked
+                ? Array.from(chips).map(chip => parseInt(chip.getAttribute('data-value'), 10))
+                : [];
+            //if (!checkbox.checked && gameSettings.operations[operation].selectedIntegers == []) {
+            //    alert("To include " + operation + " problems, be sure to select at least one number.");
+            //    checkbox.checked = false;
+            //}
+        }
+    });
+
+    //saveCustomSettingsToLocalStorage(); // Any reason to do this here?
+
+    console.log('Updated custom game settings:', gameSettings);
 }
 
 document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
     radio.addEventListener('change', function() {
 		const customSettings = document.getElementById('custom-settings');
         updateSettings(this.value);
-        if (this.value === 'custom') {
+        if (this.value == 'custom') {
             customSettings.style.display = 'block';
         } else {
             customSettings.style.display = 'none';
@@ -379,10 +460,103 @@ document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
     });
 });
 
+document.querySelectorAll('.operation').forEach(operationBlock => {
+    const checkbox = operationBlock.querySelector('input[type="checkbox"]');
+    const chips = operationBlock.querySelectorAll('.chip');
+    
+    // Toggle chips when clicked
+    chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            if (!checkbox.checked) return; // Ignore clicks if the operation is disabled
+            chip.classList.toggle('selected');
+        });
+    });
+
+    // Enable/disable chips when the operation checkbox is toggled
+    checkbox.addEventListener('change', () => {
+        const isEnabled = checkbox.checked;
+        chips.forEach(chip => {
+            chip.disabled = !isEnabled; // Disable chips if the operation is unchecked
+        });
+    });
+});
+
+// Example: Call restoreCustomSettings() when "Apply" is clicked
+document.getElementById('apply-settings-button').addEventListener('click', restoreCustomSettings);
+
+
+// Attach an event listener to the "Remember my settings" checkbox
+document.getElementById('remember-settings-checkbox').addEventListener('change', function () {
+    if (this.checked) {
+        // Save settings when the checkbox is checked
+        saveCustomSettingsToLocalStorage();
+        document.getElementById('remember-settings-info').style.display = 'block';
+    } else {
+        // Erase settings when the checkbox is unchecked
+        localStorage.removeItem('customGameSettings');
+        console.log('Custom settings removed from local storage.');
+        document.getElementById('remember-settings-info').style.display = 'none';
+    }
+});
+
+// Save custom settings to local storage, but only if the save settings box is checked
+function saveCustomSettingsToLocalStorage() {
+    if (document.getElementById('remember-settings-checkbox').checked) {
+        localStorage.setItem('customGameSettings', JSON.stringify(gameSettings.operations));
+        console.log('Custom settings saved:', gameSettings.operations);
+    } 
+}
+
+
+
+function loadCustomSettingsFromLocalStorage() {
+    const savedSettings = localStorage.getItem('customGameSettings');
+    if (savedSettings) {
+        const operations = JSON.parse(savedSettings);
+
+        // Restore settings for each operation
+        Object.keys(operations).forEach(operation => {
+            const operationBlock = document.querySelector(`.operation[data-operation="${operation}"]`);
+            if (!operationBlock) return;
+
+            const checkbox = operationBlock.querySelector('input[type="checkbox"]');
+            const minInput = operationBlock.querySelector('input[type="number"][id$="min"]');
+            const maxInput = operationBlock.querySelector('input[type="number"][id$="max"]');
+            const chips = operationBlock.querySelectorAll('.chip');
+
+            // Restore checkbox
+            checkbox.checked = operations[operation].enabled;
+
+            // Restore range inputs for addition/subtraction
+            if (minInput && maxInput) {
+                minInput.value = operations[operation].selectedIntegers[0] || 1;
+                maxInput.value = operations[operation].selectedIntegers.slice(-1)[0] || 10;
+            }
+
+            // Restore selected chips for multiplication/division
+            if (chips) {
+                chips.forEach(chip => {
+                    const value = parseInt(chip.getAttribute('data-value'), 10);
+                    chip.classList.toggle('selected', operations[operation].selectedIntegers.includes(value));
+                });
+            }
+        });
+
+        console.log('Custom settings loaded:', operations);
+    }
+}
+
+
+
 
 
 /***********************
  * INITIALIZE THE GAME *
  ***********************/
 
-startGame(); // Initialize the first question
+document.addEventListener('DOMContentLoaded', () => {
+    loadCustomSettingsFromLocalStorage();
+    //setupCustomSettingsListeners(); // Ensure listeners are attached for dynamic changes
+    startGame(); // Initialize the first question
+});
+ 

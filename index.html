@@ -45,58 +45,70 @@
 
 			<div id="custom-settings">
 				<h3>Custom Settings:</h3>
-				  <div class="operation" id="additionSettings" data-operation="+">
-					<input type="checkbox" id="add">
-					<label for="add">Addition (+)</label>
+				<label id="remember-settings">
+					<input type="checkbox" id="remember-settings-checkbox"> Remember my settings on this device
+				</label>
+				<div id="remember-settings-info">Your settings will be saved on this device.<br/>They will not be shared with anyone.</div>
+				<div class="operation" data-operation="+">
+					<input type="checkbox" id="addition-enable">
+					<label for="addition-enable">Addition (+)</label>
 					<div class="range">
-					  <label>Min:</label>
-					  <input type="number" class="min-number" value="1">
+						<label for="addition-min">Min:</label>
+						<input type="number" id="addition-min" min="1" max="99" value="1">
+						<label for="addition-max">Max:</label>
+						<input type="number" id="addition-max" min="1" max="99" value="10">
 					</div>
+				</div>
+				
+				<div class="operation" data-operation="-">
+					<input type="checkbox" id="subtraction-enable">
+					<label for="subtraction-enable">Subtraction (-)</label>
 					<div class="range">
-					  <label>Max:</label>
-					  <input type="number" class="max-number" value="99">
+						<label for="subtraction-min">Min:</label>
+						<input type="number" id="subtraction-min" min="1" max="99" value="1">
+						<label for="subtraction-max">Max:</label>
+						<input type="number" id="subtraction-max" min="1" max="99" value="10">
 					</div>
-				  </div>
-				  <div class="operation" id="subtractionSettings" data-operation="-">
-					<input type="checkbox" id="subtract">
-					<label for="subtract">Subtraction (-)</label>
-					<div class="range">
-					  <label>Min:</label>
-					  <input type="number" class="min-number" value="1">
+				</div>
+				
+				<div class="operation" data-operation="×">
+					<input type="checkbox" id="multiplication-enable" checked>
+					<label for="multiplication-enable">Multiplication (×)</label>
+					<div class="chips">
+						<button class="chip selected" data-value="1">1</button>
+						<button class="chip selected" data-value="2">2</button>
+						<button class="chip" data-value="3">3</button>
+						<button class="chip" data-value="4">4</button>
+						<button class="chip selected" data-value="5">5</button>
+						<button class="chip" data-value="6">6</button>
+						<button class="chip" data-value="7">7</button>
+						<button class="chip" data-value="8">8</button>
+						<button class="chip" data-value="9">9</button>
+						<button class="chip selected" data-value="10">10</button>
 					</div>
-					<div class="range">
-					  <label>Max:</label>
-					  <input type="number" class="max-number" value="99">
+					<p class="setting-annotation">Include multiplication problems that start with these numbers.</p>
+				</div>
+				<div class="operation" data-operation="÷">
+					<input type="checkbox" id="division-enable">
+					<label for="division-enable">Division (÷)</label>
+					<div class="chips">
+						<button class="chip selected" data-value="1">1</button>
+						<button class="chip selected" data-value="2">2</button>
+						<button class="chip" data-value="3">3</button>
+						<button class="chip" data-value="4">4</button>
+						<button class="chip" data-value="5">5</button>
+						<button class="chip" data-value="6">6</button>
+						<button class="chip" data-value="7">7</button>
+						<button class="chip" data-value="8">8</button>
+						<button class="chip" data-value="9">9</button>
+						<button class="chip selected" data-value="10">10</button>
 					</div>
-				  </div>
-				  <div class="operation" id="multiplicationSettings" data-operation="×">
-					<input type="checkbox" id="multiply" checked>
-					<label for="multiply">Multiplication (×)</label>
-					<div class="range">
-					  <label>Min:</label>
-					  <input type="number" class="min-number" value="2">
-					</div>
-					<div class="range">
-					  <label>Max:</label>
-					  <input type="number" class="max-number" value="10">
-					</div>
-				  </div>
-				  <div class="operation" id="divisionSettings" data-operation="÷">
-					<input type="checkbox" id="divide" checked>
-					<label for="divide">Division (÷)</label>
-					<div class="range">
-					  <label>Min:</label>
-					  <input type="number" class="min-number" value="2">
-					</div>
-					<div class="range">
-					  <label>Max:</label>
-					  <input type="number" class="max-number" value="10">
-					</div>
-				  </div>
+					<p class="setting-annotation">Include problems that divide a bigger number by these numbers.</p>
+				</div>
 			</div>
 
-			<!--button onclick="startGame()">Apply Settings</button>
-			<div class="reset-warning">Clicking this button will restart the game.</div-->
+			<button onclick="startGame()" id="apply-settings-button">Apply Settings</button>
+			<div class="reset-warning">Clicking this button will restart the game.</div>
 		</div>
 
 
