@@ -252,55 +252,83 @@ button {
     padding: 20px; /* Adds some space around the image */
 }
 
-/* Ensures images scale nicely on smaller screens */
-@media (max-width: 768px) {
-
-}
-
-
-
-/* Responsive styles for screens with a max width of 768px (common tablet breakpoint) */
+/* Responsive styles for smaller screens (phones) */
 @media (max-width: 768px) {
     #container {
         flex-direction: column;
         align-items: center;
-    }
-
-    #moose img {
-        max-width: 100px; /* Smaller size for smaller screens */
-        margin-right: -100px;
-        margin-bottom: 20px;
-		z-index: 2;
-		position: relative;
+        margin-top: 10px; /* Reduce margin for small screens */
     }
 
     #main-content {
-        width: 90%; /* Full width on smaller screens */
+        width: 90%; /* Expand content to fill more of the screen */
+        margin: 0 auto;
     }
-	
-	#milestone-panda {
-        max-width: 80%; /* Allows the image to take full width on small screens */
-        padding: 10px; /* Smaller padding on smaller screens */
+
+    #panda img {
+        margin-right: 0;
+    }
+
+    #settings-panel,
+    #timer-panel {
+        width: 90%; /* Reduce width for smaller screens */
+        margin: 10px auto;
+        padding: 10px; /* Decrease padding */
+    }
+
+    #game {
+        padding: 10px; /* Reduce padding inside the game area */
+        margin-top: 10px;
+    }
+
+    #answers button {
+        font-size: 14px; /* Decrease button font size */
+        padding: 8px 16px; /* Reduce button padding */
+        margin: 5px; /* Reduce spacing between buttons */
+    }
+
+    .chip {
+        padding: 6px 10px; /* Smaller chips for compact layout */
+        flex-basis: 16%; /* Force chips to break into rows of 5 */
+        max-width: 20%;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    #milestone-panda {
+        max-width: 80%; /* Ensure image scales well on small screens */
+    }
+
+    .modal {
+        padding: 10px; /* Add padding around the modal on small screens */
     }
 }
 
-/* Responsive styles for mobile devices (max-width: 480px is a common mobile breakpoint) */
+/* Ultra-small screen adjustments (e.g., portrait phones) */
 @media (max-width: 480px) {
-    #container {
-        flex-direction: column;
-        align-items: center;
+    #answers {
+        flex-direction: column; /* Stack answers vertically */
+        gap: 5px; /* Add small spacing between buttons */
     }
 
-    #moose img {
-        max-width: 80px; /* Even smaller size for mobile screens */
-        margin-bottom: 10px;
-		margin-right: -80px;
-		z-index: 2;
-		position: relative;
+    #game {
+        width: 100%; /* Expand game area to full width */
     }
 
-    #main-content {
-        width: 95%; /* Allow a little margin on the sides */
+    #settings-panel,
+    #timer-panel {
+        padding: 5px; /* Minimal padding for very small screens */
+    }
+
+    #restartButton {
+        font-size: 14px; /* Smaller font for buttons */
+        padding: 8px 10px;
+    }
+
+    .chip {
+        flex-basis: 16%; /* Force chips to break into rows of 5 */
+        max-width: 20%;
     }
 }
+
 
