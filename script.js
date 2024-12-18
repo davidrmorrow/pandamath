@@ -213,6 +213,7 @@ function generateQuestion() {
                     ? correctAnswer
                     : generateAnswerValue(num1, num2, correctAnswer, answers, operation);
             button.innerText = answerValue;
+            button.classList = 'answerButton';
             button.addEventListener('click', function () {
                 checkAnswer(this, correctAnswer);
             });
