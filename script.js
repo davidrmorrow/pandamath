@@ -1,6 +1,8 @@
+// Copyright 2024 David Grober-Morrow
+
 const questionElement = document.getElementById('question');
 const answersElement = document.getElementById('answers');
-const scoreElement = document.getElementById('score');
+const scoreElement = document.getElementById('streak-num');
 let score = 0;
 let maxPossibleScore = 0;
 let streak = 0; // Total number of answers 
@@ -24,6 +26,78 @@ const milestoneTitles = [
     // Add more titles as needed for further milestones
 ];
 let timer = 5 * 60; // 5 minutes in seconds
+let lang = 'en';
+const translations = {
+    en: {
+        'start-button': 'Start',
+        'question-prompt': 'What is',
+        'difficulty-label': 'Choose Difficulty:',
+        'easy-label': 'Easy',
+        'medium-label': 'Medium',
+        'hard-label': 'Hard',
+        'custom-label': 'Custom',
+        'custom-settings-header': 'Custom Settings:',
+        'remember-settings-label': 'Remember settings on this device',
+        'remember-settings-info': 'Your settings will be saved on this device. They will not be shared with anyone.',
+        'timer-label': 'Keep practicing for',
+        'timer-length-label': 'Timer Length in Minutes:',
+        'addition-label': 'Addition (+)',
+        'subtraction-label': 'Subtraction (-)',
+        'multiplication-label': 'Multiplication (×)',
+        'multiplication-setting-annotation': 'Include multiplication problems that start with these numbers.',
+        'division-label': 'Division (÷)',
+        'division-setting-annotation': 'Include problems that divide a bigger number by these numbers.',
+        'choose-integers-warning-multiplication': 'Oops! Be sure to choose some numbers to use for multiplication problems!',
+        'choose-integers-warning-division': 'Oops! Be sure to choose some numbers to use for division problems!',
+        'apply-settings-button': 'Apply Settings',
+        'streak-label': 'Streak',
+        'milestone-streak-message': 'Streak of',
+        'continue-button': 'Continue',
+        'timer-finished': 'You\re All Done!',
+        'milestone-titles': [   'Great job!',    
+                                'Way to go!',      
+                                'Incredible!',   
+                                'Keep going!',
+                                'Unstoppable!',  
+                                'Unbelievable!',
+                                'You\'re on fire!']
+    },
+    es: {
+        'start-button': 'Comenzar',
+        'question-prompt': '¿Cuanto es',
+        'difficulty-label': 'Elige Dificultad:',
+        'easy-label': 'Fácil',
+        'medium-label': 'Intermedio',
+        'hard-label': 'Difícil',
+        'custom-label': 'Personalizado',
+        'custom-settings-header': 'Configuraciones Personalizadas:',
+        'remember-settings-label': 'Recordar la configuración en este dispositivo',
+        'remember-settings-info': 'Su configuración se guardará en este dispositivo y no se compartirá con nadie.',
+        'timer-label': 'Sigue practicando por',
+        'timer-length-label': 'Duración del Temporizador en Minutos:',
+        'addition-label': 'Suma (+)',
+        'subtraction-label': 'Resta (-)',
+        'multiplication-label': 'Multiplicación (×)',
+        'multiplication-setting-annotation': 'Incluya problemas de multiplicación que comiencen con estos números.',
+        'division-label': 'División (÷)',
+        'division-setting-annotation': 'Incluya problemas que dividan un número mayor por estos números.',
+        'choose-integers-warning-multiplication': '¡Ups! ¡Asegúrate de elegir algunos números para usar en los problemas de multiplicación!',
+        'choose-integers-warning-division': '¡Ups! ¡Asegúrate de elegir algunos números para usar en los problemas de división!',
+        'apply-settings-button': 'Aplicar Configuración',
+        'streak-label': 'Racha',
+        'milestone-streak-message': 'Racha de',
+        'continue-button': 'Continuar',
+        'timer-finished': '¡Ya estás!',
+        'milestone-titles': [   '¡Buen trabajo!',    
+                                '¡Bien hecho!',      
+                                '¡Increíble!',   
+                                '¡Asombroso!',
+                                '¡Imparable!',  
+                                '¡Brillante!',
+                                '¡Fuego!']
+    }
+};
+
 
 let gameSettings = {
     currentDifficulty: 'custom',
@@ -40,10 +114,9 @@ function startGame() {
   // Adjust these values to change hard-coded settings
   lastMilestoneReached = 0;
   milestoneIncrements = 5;
-  hearts = 5;
   incorrectAnswers = 3;
-  score = 0;
-  scoreElement.innerText = 'Streak: 0';
+  document.getElementById('score').style.display = 'block';
+  scoreElement.innerText = '0';
 
 // Apply the selected difficulty settings
 const selectedOption = document.querySelector('input[name="difficulty"]:checked');
@@ -53,8 +126,6 @@ if (selectedOption) {
 else {
     console.error("No difficulty setting selected.");
 }
-
-  //updateHearts();
   startTimer();
   generateQuestion();
 }
@@ -74,7 +145,9 @@ function generateQuestion() {
     // Validate selectedIntegers
     if (!Array.isArray(selectedIntegers) || selectedIntegers.length === 0) {
         console.error(`No integers were selected for ${operation}`, selectedIntegers);
-        alert(`Oops! Be sure to choose some numbers to use for ${operation} problems!`);
+        
+        const warning = operation == '×' ? translations[lang]['choose-integers-warning-multiplication'] : translations[lang]['choose-integers-warning-division'];
+        alert(warning);
         return;
     }
     
@@ -112,7 +185,7 @@ function generateQuestion() {
             return;
     }
 
-    const question = `What is ${num1} ${operation} ${num2}?`;
+    const question = translations[lang]['question-prompt'] + ` ${num1} ${operation} ${num2}?`;
     questionElement.innerText = question;
     console.log(question); // Log the question for debugging purposes
 
@@ -202,11 +275,11 @@ function checkAnswer(clickedButton, correctAnswer) {
         streak = 0; // Reset the streak if the answer is incorrect
         buttons.forEach(btn => {
             if (parseInt(btn.innerText) === correctAnswer) {
-                btn.style.backgroundColor = 'lightgreen'; // Highlight the correct answer in green
+                btn.classList.add('correct'); // Highlight the correct answer in green
             } else if (parseInt(btn.innerText) === parseInt(clickedButton.innerText)) {
-                btn.style.backgroundColor = 'red'; // Highlight the clicked wrong answer in red
+                btn.classList.add('incorrect'); // Highlight the clicked wrong answer in red
             } else {
-                btn.style.opacity = 0; // Hide other incorrect answers
+                btn.classList.add('invisible'); // Hide other incorrect answers
             }
         });
         // Uncomment the following lines if you decide to handle hearts and game over
@@ -221,92 +294,40 @@ function checkAnswer(clickedButton, correctAnswer) {
         streak++;
         buttons.forEach(btn => {
             if (parseInt(btn.innerText) !== correctAnswer) {
-                btn.style.opacity = 0; // Hide incorrect answers
+                btn.classList.add('invisible'); // Hide incorrect answers
             } else {
-                btn.style.backgroundColor = 'lightgreen'; // Highlight the correct answer
+                btn.classList.add('correct'); // Highlight the correct answer
             }
         });
         checkStreakMilestone(); // Check for streak milestones
     }
-    scoreElement.innerText = `Streak: ${streak}`;
+    scoreElement.innerText = `${streak}`; // Update streak length
     setTimeout(generateQuestion, 1000); // Move to the next question after a delay
 }
 
 function startTimer() {
     const timerElement = document.getElementById('timer-panel');
+    timerElement.style.display = 'block'; // Show timer panel
 
     const interval = setInterval(() => {
         const minutes = Math.floor(timer / 60);
         const seconds = timer % 60;
-        timerElement.innerText = `Keep practicing for ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        timerElement.innerText = translations[lang]['timer-label'] + ` ${minutes}:${seconds.toString().padStart(2, '0')}`;
 
         if (timer === 0) {
             clearInterval(interval);
-            showMilestoneModal('images/HappyPanda2.png', 'You\'re all done!');
+            showMilestoneModal('images/HappyPanda2.png', translations[lang]['timer-finished']);
         }
         timer--;
     }, 1000);
 }
 
-
-function updateHearts() {
-    const livesContainer = document.getElementById('lives');
-    livesContainer.innerHTML = ''; // Clear all existing heart images
-
-    for (let i = 0; i < hearts; i++) {
-        livesContainer.innerHTML += '<img src="images/heart.webp" alt="Full Heart" class="heart">';
-    }
-}
-
-function showGameOverScreen() {
-    const gameOverModal = document.createElement('div');
-    gameOverModal.innerHTML = `
-        <div class="game-over-container">
-			<img src="images/game-over-panda.webp" alt="A Sad Panda" id="game-over-panda" />
-            <h1>Game Over</h1>
-            <p>Your score: ${score}</p>
-            <button onclick="restartGame()">Try Again</button>
-        </div>
-    `;
-    gameOverModal.classList.add('modal');
-    document.body.appendChild(gameOverModal);
-}
-
-/*
-function checkScoreMilestone() {
-    const currentMilestoneIndex = Math.floor(score / milestoneIncrements); // Determine current milestone index
-    if (currentMilestoneIndex > lastMilestoneReached) { // Check if new milestone reached
-        if (currentMilestoneIndex < milestoneTitles.length) { // Ensure it's within bounds
-            const imageName = `images/HappyPanda${currentMilestoneIndex + 1}.png`;
-            const title = milestoneTitles[currentMilestoneIndex];
-            showMilestoneModal(imageName, title);
-            lastMilestoneReached = currentMilestoneIndex; // Update the last milestone reached
-        }
-    }
-}
-
-function checkScoreMilestone() {
-    const currentMilestoneIndex = Math.floor(score / milestoneIncrements);
-    if (currentMilestoneIndex > milestoneTitles.length) {
-        // Player has exceeded the last available milestone
-		const imageName = `images/HappyPanda${milestoneTitles.length}.png`;
-        showMilestoneModal(imageName, 'Keep Going!');
-    } else if (currentMilestoneIndex > lastMilestoneReached) {
-        const imageName = `images/HappyPanda${currentMilestoneIndex}.png`;
-        const title = milestoneTitles[currentMilestoneIndex - 1];
-        showMilestoneModal(imageName, title);
-        lastMilestoneReached = currentMilestoneIndex;
-    }
-}
-*/
-
 function checkStreakMilestone() {
     if (streak % milestoneIncrements == 0 ) {
-        const milestoneIndex = Math.min(streak / 5, milestoneTitles.length);
-        showMilestoneModal(`images/HappyPanda${milestoneIndex + 1}.png`, milestoneTitles[milestoneIndex]);
+        const milestoneIndex = Math.min(streak / 5, translations[lang]['milestone-titles'].length);
+        showMilestoneModal(`images/HappyPanda${milestoneIndex + 1}.png`, translations[lang]['milestone-titles'][milestoneIndex]);
     }
 }
-
 
 function showMilestoneModal(image, title) {
     const milestoneModal = document.createElement('div');
@@ -314,8 +335,8 @@ function showMilestoneModal(image, title) {
         <div class="game-over-container">
             <img src="${image}" alt="Happy Panda" id="milestone-panda" />
             <h1>${title}</h1>
-            <p>Streak of ${streak}!</p>
-            <button onclick="closeMilestoneModal()">Continue</button>
+            <p>${translations[lang]['milestone-streak-message']} ${streak}!</p>
+            <button onclick="closeMilestoneModal()">${translations[lang]['continue-button']}</button>
         </div>
     `;
     milestoneModal.classList.add('modal');
@@ -324,15 +345,6 @@ function showMilestoneModal(image, title) {
 
 function closeMilestoneModal() {
     document.querySelector('.modal').remove();
-}
-
-function restartGame() {
-    document.querySelector('.modal').remove();
-    score = 0;
-    hearts = 6; // Resetting to 3 full hearts
-    scoreElement.innerText = 'Streak: 0';
-    //updateHearts();
-    startGame(); // Start the game again
 }
 
 /**********************
@@ -407,6 +419,11 @@ function updateOperationSettings(add, subtract, multiply, divide, minAddSub, max
 }
 
 function restoreCustomSettings() {
+
+    // Set timer length
+    const timerInput = document.getElementById('timer-length');
+    timer = parseInt(timerInput.value, 10) * 60; // Convert minutes to seconds
+ 
     document.querySelectorAll('.operation').forEach(operationBlock => {
         const operation = operationBlock.getAttribute('data-operation');
         const checkbox = operationBlock.querySelector('input[type="checkbox"]');
@@ -546,8 +563,47 @@ function loadCustomSettingsFromLocalStorage() {
     }
 }
 
+/****************
+ * LOCALIZATION *
+ ****************/
 
+document.getElementById('lang-eng').addEventListener('click', (e) => {
+    e.preventDefault();
+    switchLanguage('en');
+});
 
+document.getElementById('lang-esp').addEventListener('click', (e) => {
+    e.preventDefault();
+    switchLanguage('es');
+});
+
+function switchLanguage(newLang) {
+    lang = newLang;
+    console.log('Switching language to ' + lang);
+    updateLanguage(lang);
+    //localStorage.setItem('language', lang); // Save the selected language
+}
+
+function updateLanguage() {
+
+    if (lang != 'en' && lang != 'es' ) {
+        lang = 'en';
+        console.error('Unknown language detected for localization. Defaulting to English.');
+    }
+    const otherLang = lang == 'en' ? 'es' : 'en';
+    const elements = translations[lang];
+
+    // Dynamically update elements
+    for (const [id, text] of Object.entries(elements)) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerText = text; // Update the element's text content
+        }
+    }
+
+    // Update question prompt
+    questionElement.innerText = questionElement.innerText.replace(translations[otherLang]['question-prompt'], translations[lang]['question-prompt']);
+}
 
 
 /***********************
@@ -556,7 +612,13 @@ function loadCustomSettingsFromLocalStorage() {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadCustomSettingsFromLocalStorage();
+    updateLanguage();
     //setupCustomSettingsListeners(); // Ensure listeners are attached for dynamic changes
-    startGame(); // Initialize the first question
+
+    // Add click event to the Start button
+    document.getElementById('start-button').addEventListener('click', function () {
+        startGame(); // Start the game logic
+        startTimer(); // Start the timer
+    });
 });
  

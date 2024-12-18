@@ -8,14 +8,39 @@ body, html {
 
 #container {
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
     margin-top: 20px;
 	justify-content: center;
 }
 
+#language-selector {
+    width: 97%;
+    text-align: right;
+    padding-top: 2ex;
+}
+
+  #language-selector a {
+    text-transform: uppercase;
+    text-decoration: none;
+    color: black;
+    font-size: 80%;
+    padding-left: 4ex;
+    background-repeat: no-repeat;
+    background-size: 3ex 2ex;
+  }
+
+  #language-selector a#lang-eng {
+    background-image: url('./images/flag_en.png');
+  }
+
+  #language-selector a#lang-esp {
+    background-image: url('./images/flag_es.png');
+  }
+
 #panda img {
     max-width: 150px; /* Adjust based on your image's size */
-    margin-right: -111px;
+    margin-bottom: -14ex;
 	position: relative;
 	z-index: 2;
 }
@@ -28,7 +53,6 @@ body, html {
 #game {
     background-color: #fff; /* Example background color */
     padding: 20px;
-    border-radius: 5px;
     margin-top: 20px;
     width: fit-content;
     margin-left: auto;
@@ -38,6 +62,10 @@ body, html {
 h1, h3, #question, #score {
     text-align: center;
 }
+
+    #score {
+        display: none; /* Start out invisible */
+    }
 
 
 #answers {
@@ -53,6 +81,18 @@ h1, h3, #question, #score {
     cursor: pointer;
     transition: opacity 0.5s ease-in-out; /* Transition for fading effect */
     opacity: 1; /* Start with full opacity */
+  }
+
+  #answers button.correct {
+    background-color: lightgreen;
+  }
+
+  #answers button.incorrect {
+    background-color: red;
+  }
+
+  #answers button.invisible {
+    opacity: 0;
   }
   
 
@@ -94,6 +134,7 @@ h1, h3, #question, #score {
     color: white;
     text-align: center;
     margin-bottom: 1ex;
+    display: none; /* Start out invisible */
 }
 
 input[type="radio"] {
@@ -131,6 +172,25 @@ label {
         text-align: center;
     }
     
+
+#timer-customization {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#timer-customization label {
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+#timer-customization input {
+    width: 50px;
+    padding: 5px;
+    font-size: 14px;
+    text-align: center;
+}
 
 
 .operation {
@@ -266,7 +326,7 @@ button {
     }
 
     #panda img {
-        margin-right: 0;
+        margin-left: -15em;
     }
 
     #settings-panel,
@@ -313,6 +373,11 @@ button {
 
     #game {
         width: 100%; /* Expand game area to full width */
+    }
+
+    #panda img {
+        margin-left: -13.25em;
+        margin-bottom: -12ex;
     }
 
     #settings-panel,
