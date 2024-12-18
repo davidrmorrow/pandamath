@@ -1,5 +1,3 @@
-// Copyright 2024 David Grober-Morrow
-
 const questionElement = document.getElementById('question');
 const answersElement = document.getElementById('answers');
 const scoreElement = document.getElementById('streak-num');
@@ -60,7 +58,10 @@ const translations = {
                                 'Keep going!',
                                 'Unstoppable!',  
                                 'Unbelievable!',
-                                'You\'re on fire!']
+                                'You\'re on fire!',
+                                'Amazing!',
+                                'Brilliant!',
+                                'You rock!']
     },
     es: {
         'start-button': 'Comenzar',
@@ -94,7 +95,10 @@ const translations = {
                                 '¡Asombroso!',
                                 '¡Imparable!',  
                                 '¡Brillante!',
-                                '¡Fuego!']
+                                '¡Súper trabajo!',
+                                '¡Sigue así!',
+                                '¡Fantástico!',
+                                '¡Impresionante!']
     }
 };
 
