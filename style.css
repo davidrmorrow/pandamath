@@ -15,9 +15,10 @@ body, html {
 }
 
 #language-selector {
-    width: 97%;
+    width: 95%;
     text-align: right;
-    padding-top: 2ex;
+    padding-top: 1ex;
+    margin-bottom: -2ex;
 }
 
   #language-selector a {
@@ -72,12 +73,14 @@ h1, h3, #question, #score {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: 95%;
 }
 
 #answers button {
     margin: 10px;
     padding: 10px 20px;
     font-size: 16px;
+    border-radius: 5px;
     cursor: pointer;
     transition: opacity 0.5s ease-in-out; /* Transition for fading effect */
     opacity: 1; /* Start with full opacity */
@@ -341,6 +344,10 @@ button {
         margin-top: 10px;
     }
 
+    #answers {
+        max-width: 95%;
+    }
+
     #answers button {
         font-size: 14px; /* Decrease button font size */
         padding: 8px 16px; /* Reduce button padding */
@@ -369,6 +376,7 @@ button {
     #answers {
         flex-direction: column; /* Stack answers vertically */
         gap: 5px; /* Add small spacing between buttons */
+        max-width: 95%;
     }
 
     #game {
