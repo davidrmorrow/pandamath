@@ -53,7 +53,7 @@ const translations = {
         'streak-label': 'Streak',
         'milestone-streak-message': 'Streak of',
         'continue-button': 'Continue',
-        'timer-finished': 'You\re All Done!',
+        'timer-finished': 'You\'re All Done!',
         'milestone-titles': [   'Great job!',    
                                 'Way to go!',      
                                 'Incredible!',   
